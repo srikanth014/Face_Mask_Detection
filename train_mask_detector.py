@@ -42,7 +42,7 @@ for category in CATEGORIES:
     	img_path = os.path.join(path, img)
     	image = load_img(img_path, target_size=(224, 224))
     	image = img_to_array(image)
-    	image = preprocess_input(image)
+    	image = preprocess_input(image) # preprocessing Mobilenet
 
     	data.append(image)
     	labels.append(category)
@@ -75,12 +75,13 @@ baseModel = MobileNetV2(weights="imagenet", include_top=False,
 
 # construct the head of the model that will be placed on top of the
 # the base model
-headModel = baseModel.output
-headModel = AveragePooling2D(pool_size=(7, 7))(headModel)
-headModel = Flatten(name="flatten")(headModel)
-headModel = Dense(128, activation="relu")(headModel)
-headModel = Dropout(0.5)(headModel)
-headModel = Dense(2, activation="softmax")(headModel)
+headModel = baseModel.output # head model object created and intialized by basemodel output
+headModel = AveragePooling2D(pool_size=(7, 7))(headModel) # Downsamples the input along its spatial dimensions (height and width) by
+# taking the average value over an input window (of size defined by pool_size ) for each channel of the input
+headModel = Flatten(name="flatten")(headModel) # Flattening an image will compress all the layers in your image and leave you with one background layer
+headModel = Dense(128, activation="relu")(headModel) # 128 layers with relu activation layer (for non linear use cases, images)
+headModel = Dropout(0.5)(headModel) # avoid overfitting
+headModel = Dense(2, activation="softmax")(headModel) # output (2 layer for with and without)
 
 # place the head FC model on top of the base model (this will become
 # the actual model we will train)
@@ -93,7 +94,7 @@ for layer in baseModel.layers:
 
 # compile our model
 print("[INFO] compiling model...")
-opt = Adam(lr=INIT_LR, decay=INIT_LR / EPOCHS)
+opt = Adam(lr=INIT_LR, decay=INIT_LR / EPOCHS) # adam optimizer used when images prediction method used
 model.compile(loss="binary_crossentropy", optimizer=opt,
 	metrics=["accuracy"])
 
